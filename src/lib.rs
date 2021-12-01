@@ -2,5 +2,9 @@
 extern crate test;
 
 #[macro_use]
-mod macros;
+mod bench;
+
+#[macro_use]
+mod check;
+
 mod day01;

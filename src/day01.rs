@@ -17,3 +17,4 @@ fn count(size: usize, input: &[i32]) -> usize {
 }
 
 check!("01", ex 1 = 7, ex 2 = 5, part 1 = 1288, part 2 = 1311);
+bench!("01", part 1, part 2);
