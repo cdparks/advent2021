@@ -1,9 +1,6 @@
 #[allow(dead_code)]
-fn part1(input: &str) -> usize {
+fn part1(input: &[i32]) -> usize {
     input
-      .lines()
-      .flat_map(|line| line.parse())
-      .collect::<Vec<i32>>()
       .windows(2)
       .filter(|window| match window {
         [x, y] => y > x,
@@ -13,11 +10,8 @@ fn part1(input: &str) -> usize {
 }
 
 #[allow(dead_code)]
-fn part2(input: &str) -> usize {
+fn part2(input: &[i32]) -> usize {
     input
-      .lines()
-      .flat_map(|line| line.parse())
-      .collect::<Vec<i32>>()
       .windows(3)
       .filter_map(|window| match window {
         [x, y, z] => Some(x + y + z),
