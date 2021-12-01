@@ -5,7 +5,7 @@ pub fn parse_lines<T: std::str::FromStr>(text: &str) -> Vec<T> {
 }
 
 #[macro_export]
-macro_rules! solve {
+macro_rules! check {
     () => {};
 
     // `ex <n> = <expected>` generates a test using parsed EXAMPLE
@@ -17,7 +17,7 @@ macro_rules! solve {
                 assert_eq!(super::[<part $n>](&parsed), $expected)
             }
 
-            solve!($($tail)*);
+            check!($($tail)*);
         }
     };
 
@@ -38,7 +38,7 @@ macro_rules! solve {
                 })
             }
 
-            solve!($($tail)*);
+            check!($($tail)*);
         }
     };
 
@@ -49,7 +49,7 @@ macro_rules! solve {
             const EXAMPLE: &str = include_str!(concat!("../inputs/", $day, "/example"));
             const INPUT: &str = include_str!(concat!("../inputs/", $day, "/input"));
 
-            solve!($($tail)*);
+            check!($($tail)*);
         }
     };
 }

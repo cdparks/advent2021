@@ -26,4 +26,4 @@ fn part2(input: &[i32]) -> usize {
       .count()
 }
 
-solve!("01", ex 1 = 7, ex 2 = 5, part 1 = 1288, part 2 = 1311);
+check!("01", ex 1 = 7, ex 2 = 5, part 1 = 1288, part 2 = 1311);
