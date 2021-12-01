@@ -1,29 +1,19 @@
 #[allow(dead_code)]
 fn part1(input: &[i32]) -> usize {
-    input
-      .windows(2)
-      .filter(|window| match window {
-        [x, y] => y > x,
-        _ => false
-      })
-      .count()
+    count(2, input)
 }
 
 #[allow(dead_code)]
 fn part2(input: &[i32]) -> usize {
+    count(4, input)
+}
+
+#[inline]
+fn count(size: usize, input: &[i32]) -> usize {
     input
-      .windows(3)
-      .filter_map(|window| match window {
-        [x, y, z] => Some(x + y + z),
-        _ => None
-      })
-      .collect::<Vec<i32>>()
-      .windows(2)
-      .filter(|window| match window {
-        [x, y] => y > x,
-        _ => false
-      })
-      .count()
+        .windows(size)
+        .filter(|window| window.last() > window.first())
+        .count()
 }
 
 check!("01", ex 1 = 7, ex 2 = 5, part 1 = 1288, part 2 = 1311);
