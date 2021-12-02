@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+#![feature(never_type)]
 #![feature(test)]
 extern crate test;
 
@@ -8,3 +10,4 @@ mod bench;
 mod check;
 
 mod day01;
+mod day02;

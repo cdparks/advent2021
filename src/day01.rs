@@ -1,9 +1,7 @@
-#[allow(dead_code)]
 fn part1(input: &[i32]) -> usize {
     count(2, input)
 }
 
-#[allow(dead_code)]
 fn part2(input: &[i32]) -> usize {
     count(4, input)
 }
