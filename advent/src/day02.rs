@@ -1,6 +1,9 @@
 use std::str::FromStr;
 
-fn part1(input: &[Command]) -> usize {
+/// Interpret directions using `Up` and `Down` to adjust depth
+///
+/// Yield final distance × final depth
+pub fn part1(input: &[Command]) -> usize {
     use Command::*;
 
     let mut dist = 0;
@@ -17,7 +20,10 @@ fn part1(input: &[Command]) -> usize {
     dist * depth
 }
 
-fn part2(input: &[Command]) -> usize {
+/// Interpret directions using `Up` and `Down` to adjust aim
+///
+/// Yield final distance × final depth
+pub fn part2(input: &[Command]) -> usize {
     use Command::*;
 
     let mut aim = 0;
@@ -39,9 +45,13 @@ fn part2(input: &[Command]) -> usize {
 }
 
 #[derive(PartialEq, Eq, Debug)]
-enum Command {
+/// Parsed commands
+pub enum Command {
+    /// Move forward by the specified amount
     Forward(usize),
+    /// Move down (or adjust aim) by the specified amount
     Down(usize),
+    /// Move up (or adjust aim) by the specified amount
     Up(usize),
 }
 
