@@ -31,8 +31,8 @@ macro_rules! check {
     ($day:literal, $($tail:tt)+) => {
         #[cfg(test)]
         pub mod tests {
-            const EXAMPLE: &str = include_str!(concat!("../inputs/", $day, "/example"));
-            const INPUT: &str = include_str!(concat!("../inputs/", $day, "/input"));
+            pub (crate) const EXAMPLE: &str = include_str!(concat!("../inputs/", $day, "/example"));
+            pub (crate) const INPUT: &str = include_str!(concat!("../inputs/", $day, "/input"));
 
             check!($($tail)+);
         }
@@ -41,7 +41,7 @@ macro_rules! check {
 
 #[doc(hidden)]
 #[cfg(test)]
-pub fn parse_lines<T: std::str::FromStr>(text: &str) -> Vec<T> {
+pub (crate) fn parse_lines<T: std::str::FromStr>(text: &str) -> Vec<T> {
     text.lines()
         .flat_map(|line| line.parse())
         .collect::<Vec<T>>()
