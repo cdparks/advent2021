@@ -63,5 +63,5 @@ impl FromStr for Command {
     }
 }
 
-check!("02", ex 1 = 150, ex 2 = 900, part 1 = 1746616, part 2 = 1741971043);
+check!(ex 1 = 150, ex 2 = 900, part 1 = 1746616, part 2 = 1741971043);
 bench!(part 1, part 2);

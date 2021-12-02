@@ -14,5 +14,5 @@ fn count(size: usize, input: &[i32]) -> usize {
         .count()
 }
 
-check!("01", ex 1 = 7, ex 2 = 5, part 1 = 1288, part 2 = 1311);
+check!(ex 1 = 7, ex 2 = 5, part 1 = 1288, part 2 = 1311);
 bench!(part 1, part 2);

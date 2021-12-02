@@ -10,8 +10,8 @@ Solutions for ❄️[Advent of Code 2021]❄️ in [Rust]
 | 19   | 20   | 21   | 22   | 23    | 24   | 25🎄 |
 | 26   | 27   | 28   | 29   | 30    | 31   |      |
 
-Each solution is in `src/dayXX.rs`. Run `cargo test` to check solutions
-and `cargo bench` to run benchmarks.
+Each solution is in `advent/src/dayXX.rs`. Run `cargo test` to check
+solutions and `cargo bench` to run benchmarks.
 
 [Advent of Code 2021]: https://adventofcode.com/2021
 [Rust]: https://www.rust-lang.org/
