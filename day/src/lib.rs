@@ -3,6 +3,7 @@
 extern crate proc_macro;
 
 use proc_macro::{Span, TokenStream};
+use std::ffi::OsStr;
 
 #[proc_macro]
 pub fn day(_item: TokenStream) -> TokenStream {
@@ -11,7 +12,7 @@ pub fn day(_item: TokenStream) -> TokenStream {
 
 fn day_impl() -> Option<TokenStream> {
     let path = Span::call_site().source().source_file().path();
-    let prefix = path.file_prefix().and_then(|filename| filename.to_str())?;
+    let prefix = path.file_prefix().and_then(OsStr::to_str)?;
     let day = prefix.strip_prefix("day")?;
     format!("\"{}\"", day).parse().ok()
 }
