@@ -19,3 +19,5 @@ pub mod bench;
 pub mod day01;
 /// Solutions for day 2
 pub mod day02;
+/// Solutions for day 3
+pub mod day03;
