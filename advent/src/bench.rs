@@ -1,5 +1,5 @@
 #[macro_export]
-/// Generate benchmarks for the solution
+/// Generate benchmarks for the solution.
 ///
 /// # Examples
 ///
@@ -12,15 +12,16 @@
 /// expands to
 ///
 /// ```rust,no_run
+/// #[cfg(test)]
 /// pub mod bench {
-///   #[cfg(test)]
-///   pub mod tests {
+///     #[bench]
 ///     pub fn part1(b: &mut test::Bencher) {
 ///         let parsed = crate::check::parse_lines(super::tests::INPUT);
 ///         let arg = test::black_box(parsed);
 ///         b.iter(|| super::part1(&arg))
 ///     }
 ///
+///     #[bench]
 ///     pub fn part2(b: &mut test::Bencher) {
 ///         let parsed = crate::check::parse_lines(super::tests::INPUT);
 ///         let arg = test::black_box(parsed);

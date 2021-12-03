@@ -1,8 +1,8 @@
 use std::str::FromStr;
 
-/// Interpret directions using `Up` and `Down` to adjust depth
+/// Interpret directions using `Up` and `Down` to adjust depth.
 ///
-/// Yield final distance × final depth
+/// The result is encoded as _final distance × final depth_.
 pub fn part1(input: &[Command]) -> usize {
     use Command::*;
 
@@ -20,9 +20,9 @@ pub fn part1(input: &[Command]) -> usize {
     dist * depth
 }
 
-/// Interpret directions using `Up` and `Down` to adjust aim
+/// Interpret directions using `Up` and `Down` to adjust aim.
 ///
-/// Yield final distance × final depth
+/// The result is encoded as _final distance × final depth_.
 pub fn part2(input: &[Command]) -> usize {
     use Command::*;
 
@@ -45,13 +45,13 @@ pub fn part2(input: &[Command]) -> usize {
 }
 
 #[derive(PartialEq, Eq, Debug)]
-/// Parsed commands
+/// Submarine commands.
 pub enum Command {
-    /// Move forward by the specified amount
+    /// Move forward by the specified amount.
     Forward(usize),
-    /// Move down (or adjust aim) by the specified amount
+    /// Move down (or adjust aim) by the specified amount.
     Down(usize),
-    /// Move up (or adjust aim) by the specified amount
+    /// Move up (or adjust aim) by the specified amount.
     Up(usize),
 }
 

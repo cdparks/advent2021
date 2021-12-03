@@ -1,7 +1,7 @@
 extern crate day;
 
 #[macro_export]
-/// Generate tests against the solution's example and input files
+/// Generate tests using the solution's example and input files.
 ///
 /// # Examples
 ///
@@ -16,18 +16,20 @@ extern crate day;
 /// ```rust,no_run
 /// #[cfg(test)]
 /// pub mod tests {
-///   pub (crate) const EXAMPLE: &str = include_str!("../inputs/00/example");
-///   pub (crate) const INPUT: &str = include_str!("../inputs/00/input");
+///     pub (crate) const EXAMPLE: &str = include_str!("../inputs/00/example");
+///     pub (crate) const INPUT: &str = include_str!("../inputs/00/input");
 ///
-///   pub fn example1() {
-///       let parsed = crate::check::parse_lines(EXAMPLE);
-///       assert_eq!(super::part1(&parsed), "hello")
-///   }
+///     #[test]
+///     pub fn example1() {
+///         let parsed = crate::check::parse_lines(EXAMPLE);
+///         assert_eq!(super::part1(&parsed), "hello")
+///     }
 ///
-///   pub fn part1() {
-///       let parsed = crate::check::parse_lines(INPUT);
-///       assert_eq!(super::part1(&parsed), "world")
-///   }
+///     #[test]
+///     pub fn part1() {
+///         let parsed = crate::check::parse_lines(INPUT);
+///         assert_eq!(super::part1(&parsed), "world")
+///     }
 /// }
 /// ```
 macro_rules! check {
