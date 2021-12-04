@@ -27,7 +27,6 @@
 ///         let arg = test::black_box(parsed);
 ///         b.iter(|| super::part2(&arg))
 ///     }
-///   }
 /// }
 /// ```
 macro_rules! bench {
