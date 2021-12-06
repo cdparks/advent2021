@@ -25,3 +25,5 @@ pub mod day03;
 pub mod day04;
 /// Solutions for day 5
 pub mod day05;
+/// Solutions for day 6
+pub mod day06;

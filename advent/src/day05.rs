@@ -15,7 +15,7 @@ pub fn part2(lines: &[Line]) -> usize {
 }
 
 /// Count the number of points overlapped by the filtered lines.
-fn count_overlapping<F>(lines: &[Line], pred: F) -> usize
+pub fn count_overlapping<F>(lines: &[Line], pred: F) -> usize
 where
     F: Fn(&Line) -> bool,
 {
