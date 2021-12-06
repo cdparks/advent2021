@@ -78,7 +78,5 @@ macro_rules! gen_tests {
 #[doc(hidden)]
 #[cfg(test)]
 pub(crate) fn parse_lines<T: std::str::FromStr>(text: &str) -> Vec<T> {
-    text.lines()
-        .flat_map(str::parse)
-        .collect::<Vec<T>>()
+    text.lines().flat_map(str::parse).collect::<Vec<T>>()
 }

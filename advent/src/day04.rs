@@ -35,7 +35,7 @@ pub fn part2(input: &[String]) -> i32 {
 }
 
 /// Parse "randomly" chosen numbers.
-pub fn parse_numbers(line: &String) -> Vec<i32> {
+pub fn parse_numbers(line: &str) -> Vec<i32> {
     line.split(',').flat_map(str::parse).collect()
 }
 
@@ -44,7 +44,7 @@ pub fn parse_boards(lines: &[String]) -> Vec<Board> {
     lines
         .chunks(6)
         .map(|board| {
-            let board: Vec<String> = board.iter().skip(1).map(|x| x.clone()).collect();
+            let board: Vec<String> = board.iter().skip(1).cloned().collect();
             parse_board(&board)
         })
         .collect()
@@ -140,7 +140,7 @@ impl Display for Board {
                     write!(f, ", {:>2}", self.squares[i * 5 + j])?;
                 }
             }
-            write!(f, "\n")?;
+            writeln!(f)?;
         }
         Ok(())
     }

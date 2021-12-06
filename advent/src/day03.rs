@@ -77,7 +77,7 @@ pub fn rate(rating: Rating, input: &[String]) -> u32 {
         CO2 => (b'0', b'1'),
     };
 
-    let mut lines = Vec::from(input.clone());
+    let mut lines = Vec::from(input);
     let bits = input[0].len();
 
     for i in 0..bits {
