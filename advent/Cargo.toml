@@ -9,6 +9,7 @@ edition = "2018"
 paste = "1.0"
 nix = "0.23"
 day = { path = "../day" }
+itertools = "0.10.3"
 
 [[bin]]
 name = "advent"
