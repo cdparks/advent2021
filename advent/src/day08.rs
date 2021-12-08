@@ -46,17 +46,16 @@ pub fn solve_entry(entry: &Entry) -> u64 {
             _ => {}
         });
 
-    let mut patterns = [0; 256];
-    digits
-        .iter()
-        .enumerate()
-        .for_each(|(i, &pattern)| patterns[pattern] = i as u8);
-
     // Match output to known patterns
     entry
         .outputs
         .iter()
-        .fold(0, |acc, &pattern| acc * 10 + patterns[pattern] as u64)
+        .fold(0, |acc, &pattern| {
+            // Linear search over 10-element array is faster than using
+            // a hashmap or `[u8; 128]`
+            let digit = digits.iter().position(|&p| p == pattern).unwrap();
+            acc * 10 + digit as u64
+        })
 }
 
 #[derive(PartialEq, Eq, Debug, Copy, Clone)]
