@@ -102,13 +102,14 @@ pub fn part2(lines: &[String]) -> u64 {
 /// of the elements of the array, which is the total number of fish in
 /// the system.
 pub fn simulate(days: usize, lines: &[String]) -> u64 {
-    let mut counters: VecDeque<u64> = lines[0]
-        .split(',')
-        .flat_map(str::parse)
-        .fold(VecDeque::from([0; 9]), |mut counters, i| {
-            counters[i] += 1;
-            counters
-        });
+    let mut counters: VecDeque<u64> =
+        lines[0]
+            .split(',')
+            .flat_map(str::parse)
+            .fold(VecDeque::from([0; 9]), |mut counters, i| {
+                counters[i] += 1;
+                counters
+            });
 
     for _ in 0..days {
         counters.rotate_left(1);

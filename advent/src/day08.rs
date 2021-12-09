@@ -7,7 +7,7 @@ pub fn part1(entries: &[Entry]) -> usize {
     entries
         .iter()
         .flat_map(|entry| entry.outputs.iter().cloned())
-        .filter(|pattern| [2, 4, 3, 7].contains(&pattern.len()))
+        .filter(|pattern| [2, 4, 3, 7].contains(&pattern.segments()))
         .count()
 }
 
@@ -24,7 +24,7 @@ pub fn solve_entry(entry: &Entry) -> u64 {
     entry
         .patterns
         .iter()
-        .for_each(|&pattern| match pattern.len() {
+        .for_each(|&pattern| match pattern.segments() {
             2 => digits[1] = pattern,
             3 => digits[7] = pattern,
             4 => digits[4] = pattern,
@@ -36,7 +36,7 @@ pub fn solve_entry(entry: &Entry) -> u64 {
     entry
         .patterns
         .iter()
-        .for_each(|&pattern| match pattern.len() {
+        .for_each(|&pattern| match pattern.segments() {
             5 if (pattern & digits[1]) == digits[1] => digits[3] = pattern,
             5 if (pattern | digits[4]) == digits[8] => digits[2] = pattern,
             5 => digits[5] = pattern,
@@ -113,10 +113,10 @@ impl Pattern {
     }
 
     #[inline]
-    /// Return the pattern's length.
+    /// Return the number of active segments in the pattern
     ///
-    /// The pattern's length is actually its population count.
-    pub fn len(&self) -> u8 {
+    /// This is actually its population count.
+    pub fn segments(&self) -> u8 {
         self.byte.count_ones() as u8
     }
 }
