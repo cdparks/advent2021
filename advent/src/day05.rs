@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use itertools::Itertools;
 use std::fmt::{self, Display, Formatter};
 use std::str::FromStr;
 
@@ -23,10 +23,7 @@ where
         .iter()
         .filter_map(|&line| if pred(&line) { Some(line) } else { None })
         .flat_map(|line| line.points())
-        .fold(HashMap::new(), |mut points, point| {
-            *points.entry(point).or_insert(0) += 1;
-            points
-        })
+        .counts()
         .into_values()
         .filter(|&n| n > 1)
         .count()
@@ -76,7 +73,7 @@ impl Line {
     /// interpolate points _à la_ [Bresenham's line algorithm][Bresenham].
     ///
     /// [Bresenham]: https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
-    pub fn points(&self) -> Vec<Point> {
+    pub fn points(&self) -> impl Iterator<Item=Point> {
         assert!(self.is_horizontal() || self.is_vertical() || self.is_diagonal());
 
         let x_dist = self.rhs.x - self.lhs.x;
@@ -89,8 +86,7 @@ impl Line {
 
         let n = usize::max(x_dist.abs() as usize, y_dist.abs() as usize);
         (0..=n)
-            .map(|i| Point::new(x + dx * i as i32, y + dy * i as i32))
-            .collect()
+            .map(move |i| Point::new(x + dx * i as i32, y + dy * i as i32))
     }
 }
 
