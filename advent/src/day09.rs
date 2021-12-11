@@ -5,18 +5,14 @@ use std::collections::VecDeque;
 /// Find low points and calculate total risk.
 pub fn part1(lines: &[String]) -> usize {
     let map = parse_map(lines);
-    low_points(&map)
-        .iter()
-        .map(|height| 1 + *height as usize)
-        .sum()
+    low_points(&map).map(|height| 1 + height as usize).sum()
 }
 
 /// Find 3 largest basins and multiply their sizes together.
 pub fn part2(lines: &[String]) -> u64 {
     let map = parse_map(lines);
     low_point_coords(&map)
-        .iter()
-        .map(|(i, j)| basin_area(&map, *i, *j))
+        .map(|(i, j)| basin_area(&map, i, j))
         .sorted()
         .rev()
         .take(3)
@@ -45,61 +41,50 @@ pub fn basin_area(map: &[Vec<u8>], row: usize, col: usize) -> u64 {
 }
 
 /// Find lowest points
-pub fn low_points(map: &[Vec<u8>]) -> Vec<u8> {
-    low_point_impl(map)
-        .iter()
-        .map(|(height, _)| *height)
-        .collect()
+pub fn low_points<'a>(map: &'a [Vec<u8>]) -> impl Iterator<Item = u8> + 'a {
+    low_point_impl(map).map(|(height, _)| height)
 }
 
 /// Find lowest point coordinates.
-pub fn low_point_coords(map: &[Vec<u8>]) -> Vec<(usize, usize)> {
-    low_point_impl(map)
-        .iter()
-        .map(|(_, point)| *point)
-        .collect()
+pub fn low_point_coords<'a>(map: &'a [Vec<u8>]) -> impl Iterator<Item = (usize, usize)> + 'a {
+    low_point_impl(map).map(|(_, point)| point)
 }
 
 /// Find lowest point heights and coordinates.
-pub fn low_point_impl(map: &[Vec<u8>]) -> Vec<(u8, (usize, usize))> {
-    let mut points = Vec::new();
-    for (i, row) in map.iter().enumerate() {
-        for (j, &height) in row.iter().enumerate() {
-            let min = neighbors(map, i, j).into_iter().min().unwrap();
+pub fn low_point_impl<'a>(map: &'a [Vec<u8>]) -> impl Iterator<Item = (u8, (usize, usize))> + 'a {
+    map.iter().enumerate().flat_map(move |(i, row)| {
+        row.iter().enumerate().filter_map(move |(j, &height)| {
+            let min = neighbors(map, i, j).min().unwrap();
             if height < min {
-                points.push((height, (i, j)));
+                return Some((height, (i, j)));
             }
-        }
-    }
-    points
+            None
+        })
+    })
 }
 
-/// Find point's neighbors in cardinal directions.
-pub fn neighbors(map: &[Vec<u8>], row: usize, col: usize) -> Vec<u8> {
-    neighbor_coords(map, row, col)
-        .iter()
-        .map(|(i, j)| map[*i][*j])
-        .collect()
+/// Find point's neighbors in each cardinal direction.
+pub fn neighbors<'a>(map: &'a [Vec<u8>], row: usize, col: usize) -> impl Iterator<Item = u8> + 'a {
+    neighbor_coords(map, row, col).map(move |(i, j)| map[i][j])
 }
 
 /// Find coordinates of point's neighbors in cardinal directions.
-pub fn neighbor_coords(map: &[Vec<u8>], row: usize, col: usize) -> Vec<(usize, usize)> {
-    let max_row = map.len() - 1;
-    let max_col = map[0].len() - 1;
-    let mut coords = Vec::with_capacity(4);
-    if row > 0 {
-        coords.push((row - 1, col));
-    }
-    if col > 0 {
-        coords.push((row, col - 1));
-    }
-    if row < max_row {
-        coords.push((row + 1, col));
-    }
-    if col < max_col {
-        coords.push((row, col + 1));
-    }
-    coords
+pub fn neighbor_coords(
+    map: &[Vec<u8>],
+    row: usize,
+    col: usize,
+) -> impl Iterator<Item = (usize, usize)> {
+    let rows = 0..map.len() as isize;
+    let cols = 0..map[0].len() as isize;
+    [(-1, 0), (0, -1), (1, 0), (0, 1)]
+        .iter()
+        .filter_map(move |(dy, dx)| {
+            let point = (row as isize + dy, col as isize + dx);
+            if rows.contains(&point.0) && cols.contains(&point.1) {
+                return Some((point.0 as usize, point.1 as usize));
+            }
+            None
+        })
 }
 
 fn parse_map(lines: &[String]) -> Vec<Vec<u8>> {
