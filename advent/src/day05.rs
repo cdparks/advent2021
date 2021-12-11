@@ -73,7 +73,7 @@ impl Line {
     /// interpolate points _à la_ [Bresenham's line algorithm][Bresenham].
     ///
     /// [Bresenham]: https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
-    pub fn points(&self) -> impl Iterator<Item=Point> {
+    pub fn points(&self) -> impl Iterator<Item = Point> {
         assert!(self.is_horizontal() || self.is_vertical() || self.is_diagonal());
 
         let x_dist = self.rhs.x - self.lhs.x;
@@ -85,8 +85,7 @@ impl Line {
         let (x, y) = (self.lhs.x, self.lhs.y);
 
         let n = usize::max(x_dist.abs() as usize, y_dist.abs() as usize);
-        (0..=n)
-            .map(move |i| Point::new(x + dx * i as i32, y + dy * i as i32))
+        (0..=n).map(move |i| Point::new(x + dx * i as i32, y + dy * i as i32))
     }
 }
 
