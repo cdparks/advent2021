@@ -51,7 +51,10 @@ macro_rules! gen_tests {
             #[test]
             pub fn [<$prefix $n>]() {
                 let parsed = crate::check::parse_lines($input);
-                assert_eq!(super::[<part $n>](&parsed), $expected)
+                let now = std::time::Instant::now();
+                let result = super::[<part $n>](&parsed);
+                let elapsed = now.elapsed();
+                assert_eq!(result, $expected, "elapsed: {:?}", elapsed)
             }
         }
     };
