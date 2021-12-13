@@ -11,10 +11,10 @@ pub fn part1(lines: &[String]) -> usize {
 /// Find the first step where every octopus flashes together
 pub fn part2(lines: &[String]) -> usize {
     let mut space = Space::parse(lines);
-    std::iter::repeat_with(|| space.step())
-        .enumerate()
+    (1..)
+        .map(|i| (i, space.step()))
         .skip_while(|(_, x)| *x < 100)
-        .map(|(i, _)| i + 1)
+        .map(|(i, _)| i)
         .next()
         .unwrap()
 }
