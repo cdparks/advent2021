@@ -8,7 +8,7 @@ extern crate day;
 /// In a file named `path/to/day00.rs`, the following invocation:
 ///
 /// ```rust,no_run
-/// advent::check!(ex 1 = "hello", part 1 = "world");
+/// advent::check!(ex 1 = "hello", part 1 = "world", ex 1 = DIFF);
 /// ```
 ///
 /// expands to
@@ -30,6 +30,16 @@ extern crate day;
 ///         let parsed = crate::check::parse_lines(INPUT);
 ///         assert_eq!(super::part1(&parsed), "world")
 ///     }
+///
+///     #[test]
+///     pub fn diff_example1() {
+///         let expected: &str = include_str!("../outputs/00/example");
+///         let parsed = crate::check::parse_lines(EXAMPLE);
+///         let result = super::part1(&parsed);
+///         if result != expected {
+///             panic!("\nResult:\n{}\ndoes not match expected:\n{}\n", result, expected);
+///         }
+///     }
 /// }
 /// ```
 macro_rules! check {
@@ -38,15 +48,29 @@ macro_rules! check {
         pub mod tests {
             pub (crate) const EXAMPLE: &str = include_str!(concat!("../inputs/", day::day!(), "/example"));
             pub (crate) const INPUT: &str = include_str!(concat!("../inputs/", day::day!(), "/input"));
-            gen_tests!($($tail)+);
+            gen!($($tail)+);
         }
     };
 }
 
 #[doc(hidden)]
 #[cfg(test)]
-macro_rules! gen_tests {
-    (gen $input:ident $prefix:ident $n:literal $expected:literal) => {
+macro_rules! gen {
+    (diff, $input:ident, $prefix:ident, $n:literal, $filename:expr) => {
+        paste::paste! {
+            #[test]
+            pub fn [<diff_ $prefix $n>]() {
+                let expected: &str = include_str!(concat!("../outputs/", day::day!(), "/", $filename));
+                let parsed = crate::check::parse_lines($input);
+                let result = super::[<part $n>](&parsed);
+                if result != expected {
+                    panic!("\nResult:\n{}\ndoes not match expected:\n{}\n", result, expected);
+                }
+            }
+        }
+    };
+
+    (test, $input:ident, $prefix:ident, $n:literal, $expected:literal) => {
         paste::paste! {
             #[test]
             pub fn [<$prefix $n>]() {
@@ -59,22 +83,40 @@ macro_rules! gen_tests {
         }
     };
 
-    (ex $n:literal = $expected:literal) => {
-        gen_tests!(gen EXAMPLE example $n $expected);
+    (ex $n:literal = DIFF) => {
+        gen!(diff, EXAMPLE, example, $n, "example");
     };
 
-    (ex $n:literal = $expected:literal, $($tail:tt)+) => {
-        gen_tests!(ex $n = $expected);
-        gen_tests!($($tail)+);
+    (ex $n:literal = DIFF, $($tail:tt)+) => {
+        gen!(ex $n = DIFF);
+        gen!($($tail)+);
     };
 
-    (part $n:literal = $expected:literal) => {
-        gen_tests!(gen INPUT part $n $expected);
+    (ex $n:literal = $expected:expr) => {
+        gen!(test, EXAMPLE, example, $n, $expected);
     };
 
-    (part $n:literal = $expected:literal, $($tail:tt)+) => {
-        gen_tests!(part $n = $expected);
-        gen_tests!($($tail)+);
+    (ex $n:literal = $expected:expr, $($tail:tt)+) => {
+        gen!(ex $n = $expected);
+        gen!($($tail)+);
+    };
+
+    (part $n:literal = DIFF) => {
+        gen!(diff, INPUT, part, $n, "output");
+    };
+
+    (part $n:literal = DIFF, $($tail:tt)+) => {
+        gen!(part $n = DIFF);
+        gen!($($tail)+);
+    };
+
+    (part $n:literal = $expected:expr) => {
+        gen!(test, INPUT, part, $n, $expected);
+    };
+
+    (part $n:literal = $expected:expr, $($tail:tt)+) => {
+        gen!(part $n = $expected);
+        gen!($($tail)+);
     };
 }
 
