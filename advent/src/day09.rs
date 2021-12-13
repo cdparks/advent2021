@@ -41,17 +41,17 @@ pub fn basin_area(map: &[Vec<u8>], row: usize, col: usize) -> u64 {
 }
 
 /// Find lowest points
-pub fn low_points<'a>(map: &'a [Vec<u8>]) -> impl Iterator<Item = u8> + 'a {
+pub fn low_points(map: &[Vec<u8>]) -> impl Iterator<Item = u8> + '_ {
     low_point_impl(map).map(|(height, _)| height)
 }
 
 /// Find lowest point coordinates.
-pub fn low_point_coords<'a>(map: &'a [Vec<u8>]) -> impl Iterator<Item = (usize, usize)> + 'a {
+pub fn low_point_coords(map: &[Vec<u8>]) -> impl Iterator<Item = (usize, usize)> + '_ {
     low_point_impl(map).map(|(_, point)| point)
 }
 
 /// Find lowest point heights and coordinates.
-pub fn low_point_impl<'a>(map: &'a [Vec<u8>]) -> impl Iterator<Item = (u8, (usize, usize))> + 'a {
+pub fn low_point_impl(map: &[Vec<u8>]) -> impl Iterator<Item = (u8, (usize, usize))> + '_ {
     map.iter().enumerate().flat_map(move |(i, row)| {
         row.iter().enumerate().filter_map(move |(j, &height)| {
             let min = neighbors(map, i, j).min().unwrap();
@@ -64,7 +64,7 @@ pub fn low_point_impl<'a>(map: &'a [Vec<u8>]) -> impl Iterator<Item = (u8, (usiz
 }
 
 /// Find point's neighbors in each cardinal direction.
-pub fn neighbors<'a>(map: &'a [Vec<u8>], row: usize, col: usize) -> impl Iterator<Item = u8> + 'a {
+pub fn neighbors(map: &[Vec<u8>], row: usize, col: usize) -> impl Iterator<Item = u8> + '_ {
     neighbor_coords(map, row, col).map(move |(i, j)| map[i][j])
 }
 

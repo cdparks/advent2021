@@ -111,6 +111,12 @@ impl<'a> Graph<'a> {
     }
 }
 
+impl<'a> Default for Graph<'a> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[derive(PartialEq, Eq, Debug, Copy, Clone)]
 /// The kind of node at an index in the graph.
 pub enum Kind {
@@ -184,7 +190,13 @@ impl Path {
     }
 }
 
-fn parse_graph<'a>(lines: &'a [String]) -> Graph<'a> {
+impl Default for Path {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+fn parse_graph(lines: &[String]) -> Graph<'_> {
     lines.iter().flat_map(|line| line.split_once('-')).fold(
         Graph::new(),
         |mut graph, (lhs, rhs)| {
