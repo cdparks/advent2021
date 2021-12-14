@@ -93,7 +93,7 @@ impl FromStr for Point {
 pub enum Fold {
     /// Fold over vertical line x=n.
     X(usize),
-    /// Fold over horizontal lin y=n.
+    /// Fold over horizontal line y=n.
     Y(usize),
 }
 

@@ -15,7 +15,7 @@ pub fn part2(lines: &[String]) -> usize {
 
 /// Evolve the polymer for _n_ steps.
 pub fn solve(n: usize, template: &str, rules: &HashMap<(char, char), char>) -> usize {
-    let counts = template.chars().zip(template.chars().skip(1)).counts();
+    let counts = template.chars().tuple_windows().counts();
     let counts = (0..n).fold(counts, |counts, _| evolve(counts, rules));
     let last = template.chars().last().unwrap();
     diff(last, counts)
