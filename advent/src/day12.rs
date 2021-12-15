@@ -39,8 +39,8 @@ fn walk<'a>(graph: &'a Graph<'a>, path: &mut Path, mut twice: bool, node: usize)
 
     let paths = graph
         .neighbors(node)
-        .filter(|neighbor| graph.kind(**neighbor) != Kind::Start)
-        .map(|neighbor| walk(graph, path, twice, *neighbor))
+        .filter(|&&neighbor| graph.kind(neighbor) != Kind::Start)
+        .map(|&neighbor| walk(graph, path, twice, neighbor))
         .sum();
 
     path.pop();
@@ -74,7 +74,7 @@ impl<'a> Graph<'a> {
 
     /// Retrieve a vertex's index, adding it to the graph if necessary.
     pub fn vert(&mut self, key: &'a str) -> usize {
-        match self.verts.iter().position(|vert| *vert == key) {
+        match self.verts.iter().position(|&vert| vert == key) {
             Some(i) => i,
             None => {
                 let i = self.len;
@@ -185,7 +185,7 @@ impl Path {
     fn occurrences(&self, key: usize) -> usize {
         self.path[0..self.len]
             .iter()
-            .filter(|node| **node == key)
+            .filter(|&&node| node == key)
             .count()
     }
 }

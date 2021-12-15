@@ -18,10 +18,10 @@ pub fn part1(input: &[String]) -> u32 {
     let mut epsilon = 0;
     let bits = input[0].len();
 
-    for n in ones.iter().take(bits) {
+    for &n in ones.iter().take(bits) {
         gamma *= 2;
         epsilon *= 2;
-        if *n > 0 {
+        if n > 0 {
             gamma += 1;
         } else {
             epsilon += 1;
@@ -65,7 +65,7 @@ pub enum Rating {
 /// use advent::day03::*;
 /// let input: Vec<String> = ["01", "10", "10"]
 ///     .iter()
-///     .map(|s| String::from(*s))
+///     .map(|&s| String::from(s))
 ///     .collect();
 /// assert_eq!(rate(Rating::O2, &input), 0b10);
 /// assert_eq!(rate(Rating::CO2, &input), 0b01);

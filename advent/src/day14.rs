@@ -26,8 +26,8 @@ pub fn diff(last: char, counts: HashMap<(char, char), usize>) -> usize {
     let mut totals: HashMap<char, usize> =
         counts
             .iter()
-            .fold(HashMap::new(), |mut totals, ((lhs, _), n)| {
-                *totals.entry(*lhs).or_default() += n;
+            .fold(HashMap::new(), |mut totals, (&(lhs, _), n)| {
+                *totals.entry(lhs).or_default() += n;
                 totals
             });
 
@@ -48,10 +48,10 @@ pub fn evolve(
 ) -> HashMap<(char, char), usize> {
     counts
         .iter()
-        .fold(HashMap::new(), |mut counts, ((lhs, rhs), n)| {
-            let x = rules[&(*lhs, *rhs)];
-            *counts.entry((*lhs, x)).or_default() += n;
-            *counts.entry((x, *rhs)).or_default() += n;
+        .fold(HashMap::new(), |mut counts, (&(lhs, rhs), n)| {
+            let x = rules[&(lhs, rhs)];
+            *counts.entry((lhs, x)).or_default() += n;
+            *counts.entry((x, rhs)).or_default() += n;
             counts
         })
 }

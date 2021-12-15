@@ -13,7 +13,7 @@ pub fn part2(lines: &[String]) -> usize {
     let mut space = Space::parse(lines);
     (1..)
         .map(|i| (i, space.step()))
-        .skip_while(|(_, x)| *x < 100)
+        .skip_while(|&(_, x)| x < 100)
         .map(|(i, _)| i)
         .next()
         .unwrap()
@@ -77,7 +77,7 @@ fn neighbors(point: (usize, usize)) -> impl Iterator<Item = (usize, usize)> {
     let col = point.1 as isize;
     (-1..=1)
         .cartesian_product(-1..=1)
-        .filter(|(dy, dx)| *dy != 0 || *dx != 0)
+        .filter(|&(dy, dx)| dy != 0 || dx != 0)
         .filter_map(move |(dy, dx)| {
             let point = (row + dy, col + dx);
             if range.contains(&point.0) && range.contains(&point.1) {

@@ -96,8 +96,8 @@ impl Board {
         }
 
         let mut check = false;
-        for (i, square) in self.squares.iter().rev().enumerate() {
-            if *square == n {
+        for (i, &square) in self.squares.iter().rev().enumerate() {
+            if square == n {
                 self.marked |= 1 << i;
                 self.last = n;
                 check = true;
@@ -107,7 +107,7 @@ impl Board {
         self.won = check
             && WINNING_MASKS
                 .iter()
-                .any(|mask| (mask & self.marked) == *mask);
+                .any(|&mask| (mask & self.marked) == mask);
         self.won
     }
 
@@ -118,9 +118,9 @@ impl Board {
             .iter()
             .rev()
             .enumerate()
-            .filter_map(|(i, square)| {
+            .filter_map(|(i, &square)| {
                 if self.marked & (1 << i) == 0 {
-                    Some(*square)
+                    Some(square)
                 } else {
                     None
                 }

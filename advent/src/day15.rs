@@ -38,8 +38,8 @@ impl Graph {
 
     /// Find the bottom-right point.
     pub fn target(&self) -> Point {
-        let row = self.graph.keys().map(|(row, _)| *row).max().unwrap();
-        let col = self.graph.keys().map(|(_, col)| *col).max().unwrap();
+        let row = self.graph.keys().map(|&(row, _)| row).max().unwrap();
+        let col = self.graph.keys().map(|&(_, col)| col).max().unwrap();
         (row, col)
     }
 
@@ -58,10 +58,10 @@ impl Graph {
         let graph = (0..n)
             .cartesian_product(0..n)
             .flat_map(|(y, x)| {
-                self.graph.iter().map(move |((row, col), cost)| {
+                self.graph.iter().map(move |((row, col), &cost)| {
                     let row = row + height * y;
                     let col = col + width * x;
-                    let cost = ((*cost as i64 + x + y) - 1) % 9 + 1;
+                    let cost = ((cost as i64 + x + y) - 1) % 9 + 1;
                     ((row, col), cost as usize)
                 })
             })
@@ -78,7 +78,7 @@ impl Graph {
         let mut costs: HashMap<_, _> = self
             .graph
             .iter()
-            .map(|(point, _)| (*point, usize::MAX))
+            .map(|(&point, _)| (point, usize::MAX))
             .collect();
         costs.insert((0, 0), 0);
 
