@@ -38,6 +38,9 @@ extern crate day;
 ///         let result = super::part1(&parsed);
 ///         if result != expected {
 ///             panic!("\nResult:\n{}\ndoes not match expected:\n{}\n", result, expected);
+///         } else {
+///             // See output with `cargo test -- --nocapture`
+///             println!("\n{}", result);
 ///         }
 ///     }
 /// }
@@ -65,6 +68,9 @@ macro_rules! gen {
                 let result = super::[<part $n>](&parsed);
                 if result != expected {
                     panic!("\nResult:\n{}\ndoes not match expected:\n{}\n", result, expected);
+                } else {
+                    // See output with `cargo test -- --nocapture`
+                    println!("\n{}", result);
                 }
             }
         }
