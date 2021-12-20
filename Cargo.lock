@@ -8,6 +8,7 @@ version = "0.1.0"
 dependencies = [
  "day",
  "itertools",
+ "lazy_static",
  "nix",
  "paste",
  "sscanf",

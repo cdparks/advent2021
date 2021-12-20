@@ -51,3 +51,5 @@ pub mod day16;
 pub mod day17;
 /// solutions for day 18
 pub mod day18;
+/// solutions for day 19
+pub mod day19;
