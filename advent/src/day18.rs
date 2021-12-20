@@ -1,5 +1,6 @@
 use itertools::Itertools;
 use std::iter::Peekable;
+use std::ops::Add;
 use std::str::Chars;
 use std::str::FromStr;
 
@@ -20,8 +21,8 @@ pub fn part2(nodes: &[Node]) -> u64 {
         .cloned()
         .cartesian_product(nodes.iter().cloned())
         .fold(0, |acc, (lhs, rhs)| {
-            let x = lhs.clone().add(rhs.clone());
-            let y = rhs.add(lhs);
+            let x = lhs.clone() + rhs.clone();
+            let y = rhs + lhs;
             acc.max(x.magnitude()).max(y.magnitude())
         })
 }
@@ -35,14 +36,17 @@ pub enum Node {
     Pair(Box<Node>, Box<Node>),
 }
 
-impl Node {
+impl Add for Node {
+    type Output = Node;
     /// Add two snailfish numbers together and reduce the result.
-    pub fn add(self, other: Node) -> Self {
+    fn add(self, other: Node) -> Self {
         let mut node = Node::Pair(Box::new(self), Box::new(other));
         while node.explode() || node.split() {}
         node
     }
+}
 
+impl Node {
     /// Compute the total magnitude of the snailfish number.
     pub fn magnitude(&self) -> u64 {
         match self {
@@ -128,7 +132,7 @@ impl FromStr for Node {
 }
 
 /// Parse a Node from a Stream.
-pub fn parse<'a>(stream: &mut Stream<'a>) -> Option<Node> {
+pub fn parse(stream: &mut Stream<'_>) -> Option<Node> {
     let c = stream.peek()?;
     if c == '[' {
         parse_node(stream)
@@ -140,7 +144,7 @@ pub fn parse<'a>(stream: &mut Stream<'a>) -> Option<Node> {
 }
 
 /// Parse a Node from a Stream.
-pub fn parse_node<'a>(stream: &mut Stream<'a>) -> Option<Node> {
+pub fn parse_node(stream: &mut Stream<'_>) -> Option<Node> {
     stream.expect('[')?;
     let lhs = parse(stream)?;
     stream.expect(',')?;
@@ -150,7 +154,7 @@ pub fn parse_node<'a>(stream: &mut Stream<'a>) -> Option<Node> {
 }
 
 /// Parse a number from a Stream.
-pub fn parse_num<'a>(stream: &mut Stream<'a>) -> Option<Node> {
+pub fn parse_num(stream: &mut Stream<'_>) -> Option<Node> {
     let mut n = 0;
     while let Some(digit) = stream.digit() {
         n = n * 10 + digit;
