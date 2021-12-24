@@ -5,6 +5,7 @@
 #![deny(missing_docs)]
 #![feature(never_type)]
 #![feature(test)]
+#![feature(try_blocks)]
 extern crate test;
 
 #[macro_use]
@@ -59,3 +60,5 @@ pub mod day20;
 pub mod day21;
 /// solutions for day 22
 pub mod day22;
+/// solutions for day 23
+pub mod day23;
