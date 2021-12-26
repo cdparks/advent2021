@@ -33,30 +33,29 @@ fn solve(mut map: Vec<Vec<Facing>>) -> usize {
     steps
 }
 
-/// Attempt to move each matching item as specified, overwriting the
-/// input map and returning whether any moves took place.
+/// Attempt to move each matching item as specified, returning whether
+/// any moves took place.
 fn step(map: &mut Vec<Vec<Facing>>, direction: Facing, change: (usize, usize)) -> bool {
     let (dy, dx) = change;
-    let num_rows = map.len();
-    let num_cols = map[0].len();
-
-    let mut out = vec![vec![Facing::Empty; num_cols]; num_rows];
-    let mut moved = false;
+    let rows = map.len();
+    let cols = map[0].len();
+    let mut changes = Vec::new();
 
     for (i, row) in map.iter().enumerate() {
         for (j, &facing) in row.iter().enumerate() {
-            let (r, c) = ((i + dy) % num_rows, (j + dx) % num_cols);
+            let (r, c) = ((i + dy) % rows, (j + dx) % cols);
             if facing == direction && map[r][c] == Facing::Empty {
-                moved = true;
-                out[r][c] = facing;
-            } else if facing != Facing::Empty {
-                out[i][j] = facing;
+                changes.push(((i, j), (r, c)));
             }
         }
     }
 
-    *map = out;
-    moved
+    let changed = changes.len() > 0;
+    for ((i, j), (r, c)) in changes.into_iter() {
+        map[r][c] = direction;
+        map[i][j] = Facing::Empty;
+    }
+    changed
 }
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
