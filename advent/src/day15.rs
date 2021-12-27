@@ -105,7 +105,6 @@ impl Graph {
                     &parents,
                 ));
                 let gif = File::create("day15.gif").unwrap();
-                let (height, width) = self.dimensions();
                 let mut encoder = GifEncoder::new(gif);
                 encoder.encode_frames(frames).unwrap();
                 return cost;
