@@ -1,24 +1,164 @@
 use itertools::Itertools;
+use std::collections::HashSet;
 use std::str::FromStr;
+
+use image::codecs::gif::GifEncoder;
+use image::imageops::{resize, FilterType};
+use image::{Delay, Frame, Rgba, RgbaImage};
+use std::fs::File;
+use std::time::Duration;
 
 /// Fold paper along first line.
 pub fn part1(lines: &[String]) -> usize {
     let (points, folds) = parse(lines);
-    fold(points, &folds[0]).len()
+    fold(points, &folds[0])
+        .last()
+        .unwrap()
+        .iter()
+        .unique()
+        .count()
 }
 
 /// Completely fold paper and render result.
 pub fn part2(lines: &[String]) -> String {
     let (points, folds) = parse(lines);
-    render(folds.iter().fold(points, fold))
+    let mut width = (points.iter().map(|point| point.x).max().unwrap_or(0) + 1) as u32;
+    let mut height = (points.iter().map(|point| point.y).max().unwrap_or(0) + 1) as u32;
+    let global_bounds = (width, height);
+    println!("{} x {}", width, height);
+    let mut frames = Vec::new();
+    let points = folds.iter().fold(points, |points, f| {
+        let before = points.clone();
+        let changes = fold(points, &f);
+        let sample = if changes.len() > 16 {
+            changes.len() / 16
+        } else {
+            1
+        };
+        println!("gen {} changes, sample % {}", changes.len(), sample);
+        for (i, change) in changes.iter().enumerate() {
+            if i == changes.len() - 1 || i % sample == 0 {
+                frames.push(paint(
+                    global_bounds,
+                    (width, height),
+                    &before,
+                    &change,
+                    Some(*f),
+                ));
+            }
+        }
+        if changes.len() == 12 {
+            println!("last gen, adding more frames");
+            let change = changes.last().unwrap();
+            for _ in 0..30 {
+                frames.push(paint(
+                    global_bounds,
+                    (width, height),
+                    &before,
+                    &change,
+                    Some(*f),
+                ));
+            }
+        }
+        match f {
+            Fold::X(x) => width = *x as u32 + 1,
+            Fold::Y(y) => height = *y as u32 + 1,
+        }
+        changes.last().unwrap().iter().unique().copied().collect()
+    });
+    let final_width = (points.iter().map(|point| point.x).max().unwrap_or(0) + 1) as u32;
+    let final_height = (points.iter().map(|point| point.y).max().unwrap_or(0) + 1) as u32;
+    for _ in 0..30 {
+        frames.push(paint(
+            global_bounds,
+            (final_width, final_height),
+            &points,
+            &points,
+            None,
+        ));
+    }
+    println!("{} {} x {} frames", frames.len(), width, height);
+    let gif = File::create("day13.gif").unwrap();
+    let mut encoder = GifEncoder::new(gif);
+    encoder.encode_frames(frames).unwrap();
+    render(points)
 }
 
-fn fold(points: Vec<Point>, fold: &Fold) -> Vec<Point> {
-    points
-        .iter()
-        .map(|point| point.fold(fold))
-        .unique()
-        .collect()
+fn fold(mut points: Vec<Point>, fold: &Fold) -> Vec<Vec<Point>> {
+    let mut changed = true;
+    let mut changes: Vec<Vec<Point>> = Vec::new();
+    let targets: Vec<Point> = points.iter().map(|point| point.fold(fold)).collect();
+
+    while changed {
+        changed = false;
+        points = points
+            .iter()
+            .enumerate()
+            .map(|(i, point)| {
+                let target = targets[i];
+                if point.x != target.x {
+                    changed = true;
+                    Point::new(point.x - 1, point.y)
+                } else if point.y != target.y {
+                    changed = true;
+                    Point::new(point.x, point.y - 1)
+                } else {
+                    *point
+                }
+            })
+            .collect();
+        if changed {
+            changes.push(points.clone())
+        }
+    }
+    changes
+}
+
+fn paint(
+    global_bounds: (u32, u32),
+    current_bounds: (u32, u32),
+    points: &Vec<Point>,
+    changes: &Vec<Point>,
+    fold: Option<Fold>,
+) -> Frame {
+    let (width, height) = current_bounds;
+    let mut buffer = RgbaImage::new(width, height);
+    let axis: HashSet<Point> = match fold {
+        Some(Fold::X(x)) => (0..height).map(|y| Point::new(x, y as usize)).collect(),
+        Some(Fold::Y(y)) => (0..width).map(|x| Point::new(x as usize, y)).collect(),
+        None => HashSet::new(),
+    };
+    for y in 0..height {
+        for x in 0..width {
+            let point = Point::new(x as usize, y as usize);
+            if let Some(i) = changes.iter().position(|&x| x == point) {
+                if points[i] != point {
+                    buffer.put_pixel(x, y, Rgba([255, 255, 0, 1]));
+                } else {
+                    buffer.put_pixel(x, y, Rgba([0, 255, 255, 1]));
+                }
+            } else if axis.contains(&point) {
+                buffer.put_pixel(x, y, Rgba([255, 0, 255, 1]));
+            } else {
+                buffer.put_pixel(x, y, Rgba([0, 0, 0, 1]));
+            }
+        }
+    }
+    if global_bounds.0 != width || global_bounds.1 != height {
+        buffer = resize(
+            &buffer,
+            global_bounds.0,
+            global_bounds.1,
+            FilterType::Nearest,
+        );
+    }
+
+    Frame::from_parts(
+        buffer,
+        0,
+        0,
+        Delay::from_saturating_duration(Duration::from_millis(100)),
+    )
 }
 
 fn render(points: Vec<Point>) -> String {
@@ -88,7 +228,7 @@ impl FromStr for Point {
     }
 }
 
-#[derive(PartialEq, Eq, Debug)]
+#[derive(PartialEq, Eq, Debug, Copy, Clone)]
 /// Represents a fold across an axis.
 pub enum Fold {
     /// Fold over vertical line x=n.
