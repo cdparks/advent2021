@@ -16,6 +16,9 @@ pub mod check;
 /// Macros for generating benchmarks
 pub mod bench;
 
+/// gif helpers
+pub mod gif;
+
 /// Solutions for day 1
 pub mod day01;
 /// Solutions for day 2
