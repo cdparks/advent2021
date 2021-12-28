@@ -1,9 +1,5 @@
-use image::codecs::gif::GifEncoder;
-use image::imageops::{resize, FilterType};
-use image::{Delay, Frame, Rgba, RgbaImage};
+use crate::gif::{self, Image};
 use itertools::Itertools;
-use std::fs::File;
-use std::time::Duration;
 
 /// Find the step where no more moves are possible.
 pub fn part1(lines: &[String]) -> usize {
@@ -39,38 +35,24 @@ fn solve(mut map: Vec<Vec<Facing>>) -> usize {
             break;
         }
     }
-    const SCALE: u32 = 5;
+
+    const SCALE: usize = 5;
     const SAMPLE: usize = 4;
-    let mut width = map[0].len() as u32;
-    let mut height = map.len() as u32;
-    println!("{} {} x {} images", images.len(), width, height,);
-    width *= SCALE;
-    height *= SCALE;
+
+    let width = map[0].len();
+    let height = map.len();
+
     let frames = images
         .iter()
         .rev()
         .enumerate()
         .filter(|(i, _)| *i == 0 || *i % SAMPLE == 0)
         .rev()
-        .map(|(_, image)| {
-            let resized = resize(image, width, height, FilterType::Nearest);
-            Frame::from_parts(
-                resized,
-                0,
-                0,
-                Delay::from_saturating_duration(Duration::from_millis(1)),
-            )
-        })
+        .map(|(_, image)| image.resize(width * SCALE, height * SCALE).frame(1))
         .collect_vec();
-    println!(
-        "{} {} x {} filtered resized frames",
-        frames.len(),
-        width,
-        height
-    );
-    let gif = File::create("day25.gif").unwrap();
-    let mut encoder = GifEncoder::new(gif);
-    encoder.encode_frames(frames).unwrap();
+
+    println!("{} {} x {} filtered frames", frames.len(), width, height);
+    gif::write("day25.gif", frames);
     steps
 }
 
@@ -99,22 +81,20 @@ fn step(map: &mut Vec<Vec<Facing>>, direction: Facing, change: (usize, usize)) -
     changed
 }
 
-fn paint(map: &Vec<Vec<Facing>>) -> RgbaImage {
-    let width = map[0].len() as u32;
-    let height = map.len() as u32;
-    let mut buffer = RgbaImage::new(width, height);
+fn paint(map: &Vec<Vec<Facing>>) -> Image {
+    let width = map[0].len();
+    let height = map.len();
+    let mut image = Image::new(width, height);
     for y in 0..height {
         for x in 0..width {
-            let i = y as usize;
-            let j = x as usize;
-            match map[i][j] {
-                Facing::Empty => buffer.put_pixel(x, y, Rgba([0, 0, 0, 1])),
-                Facing::East => buffer.put_pixel(x, y, Rgba([255, 0, 64, 1])),
-                Facing::South => buffer.put_pixel(x, y, Rgba([0, 64, 255, 1])),
+            match map[y][x] {
+                Facing::Empty => image.black(x, y),
+                Facing::East => image.set(x, y, [255, 0, 64]),
+                Facing::South => image.set(x, y, [0, 64, 255]),
             }
         }
     }
-    buffer
+    image
 }
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]

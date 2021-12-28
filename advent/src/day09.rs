@@ -1,12 +1,7 @@
+use crate::gif::{self, Image};
 use itertools::Itertools;
 use std::collections::VecDeque;
 use std::collections::{HashMap, HashSet};
-
-use image::codecs::gif::GifEncoder;
-use image::imageops::{resize, FilterType};
-use image::{Delay, Frame, Rgba, RgbaImage};
-use std::fs::File;
-use std::time::Duration;
 
 /// Find low points and calculate total risk.
 pub fn part1(lines: &[String]) -> usize {
@@ -26,10 +21,8 @@ pub enum Mode {
 /// Find 3 largest basins and multiply their sizes together.
 pub fn part2(lines: &[String]) -> u64 {
     let map = parse_map(lines);
-    let mut images = Vec::new();
+    let mut images: Vec<Image> = Vec::new();
     let mut points = HashMap::new();
-    const SCALE: u32 = 7;
-    const SAMPLE: usize = 36;
     let mut areas = HashMap::new();
     let mut seen = HashMap::new();
     let result = low_point_coords(&map)
@@ -62,36 +55,27 @@ pub fn part2(lines: &[String]) -> u64 {
             );
         })
         .product();
-    let mut width = images[0].width();
-    let mut height = images[0].width();
-    println!("{} {} x {} images", images.len(), width, height,);
-    width *= SCALE;
-    height *= SCALE;
-    let frames = images
+
+    const SCALE: usize = 7;
+    const SAMPLE: usize = 36;
+
+    let (width, height) = images[0].dimension();
+    let mut frames = images
         .iter()
         .rev()
         .enumerate()
         .filter(|(i, _)| *i == 0 || *i % SAMPLE == 0)
         .rev()
-        .map(|(_, image)| {
-            let resized = resize(image, width, height, FilterType::Nearest);
-            Frame::from_parts(
-                resized,
-                0,
-                0,
-                Delay::from_saturating_duration(Duration::from_millis(1)),
-            )
-        })
+        .map(|(_, image)| image.resize(width * SCALE, height * SCALE).frame(1))
         .collect_vec();
-    println!(
-        "{} {} x {} filtered resized frames",
-        frames.len(),
-        width,
-        height
-    );
-    let gif = File::create("day09.gif").unwrap();
-    let mut encoder = GifEncoder::new(gif);
-    encoder.encode_frames(frames).unwrap();
+
+    // Duplicate last frame
+    let frame = frames.last().unwrap().clone();
+    for _ in 0..20 {
+        frames.push(frame.clone());
+    }
+
+    gif::write("day09.gif", frames);
     result
 }
 
@@ -104,7 +88,7 @@ pub fn basin_area(
     seen: &mut HashMap<(usize, usize), u8>,
     row: usize,
     col: usize,
-    images: &mut Vec<RgbaImage>,
+    images: &mut Vec<Image>,
     mode: Mode,
 ) -> u64 {
     let mut queue = VecDeque::from([(row, col)]);
@@ -139,11 +123,9 @@ fn paint(
     area: &HashMap<(usize, usize), u8>,
     fringe: HashSet<(usize, usize)>,
     mode: Mode,
-) -> RgbaImage {
+) -> Image {
     let (width, height) = bounds;
-    let height = height as u32;
-    let width = width as u32;
-    let mut buffer = RgbaImage::new(width, height);
+    let mut image = Image::new(width, height);
     for y in 0..height {
         for x in 0..width {
             let i = y as usize;
@@ -153,30 +135,30 @@ fn paint(
             match mode {
                 Mode::Gradient => {
                     if fringe.contains(&point) && height.is_none() {
-                        buffer.put_pixel(x, y, Rgba([0, 255, 255, 1]));
+                        image.set(x, y, [0, 255, 255]);
                     } else if let Some(&height) = height {
                         let b = (((8 - height) as f64 / 8.0) * 255.0).floor() as u8;
-                        buffer.put_pixel(x, y, Rgba([0, 0, b, 1]));
+                        image.set(x, y, [0, 0, b]);
                     } else {
-                        buffer.put_pixel(x, y, Rgba([0, 0, 0, 1]));
+                        image.black(x, y);
                     }
                 }
                 Mode::Fill => {
                     if area.contains_key(&point) {
                         let height = height.unwrap();
                         let b = (((8 - height) as f64 / 8.0) * 255.0).floor() as u8;
-                        buffer.put_pixel(x, y, Rgba([b, 0, b, 1]));
+                        image.set(x, y, [b, 0, b]);
                     } else if let Some(&height) = height {
                         let b = (((8 - height) as f64 / 8.0) * 255.0).floor() as u8;
-                        buffer.put_pixel(x, y, Rgba([0, 0, b, 1]));
+                        image.set(x, y, [0, 0, b]);
                     } else {
-                        buffer.put_pixel(x, y, Rgba([0, 0, 0, 1]));
+                        image.black(x, y);
                     }
                 }
             }
         }
     }
-    buffer
+    image
 }
 
 /// Find lowest points

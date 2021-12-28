@@ -2,11 +2,7 @@ use itertools::Itertools;
 use std::collections::HashSet;
 use std::str::FromStr;
 
-use image::codecs::gif::GifEncoder;
-use image::imageops::{resize, FilterType};
-use image::{Delay, Frame, Rgba, RgbaImage};
-use std::fs::File;
-use std::time::Duration;
+use crate::gif::{self, Frame, Image};
 
 /// Fold paper along first line.
 pub fn part1(lines: &[String]) -> usize {
@@ -22,10 +18,10 @@ pub fn part1(lines: &[String]) -> usize {
 /// Completely fold paper and render result.
 pub fn part2(lines: &[String]) -> String {
     let (points, folds) = parse(lines);
-    let mut width = (points.iter().map(|point| point.x).max().unwrap_or(0) + 1) as u32;
-    let mut height = (points.iter().map(|point| point.y).max().unwrap_or(0) + 1) as u32;
+    let mut width = points.iter().map(|point| point.x).max().unwrap_or(0) + 1;
+    let mut height = points.iter().map(|point| point.y).max().unwrap_or(0) + 1;
     let global_bounds = (width, height);
-    println!("{} x {}", width, height);
+
     let mut frames = Vec::new();
     let points = folds.iter().fold(points, |points, f| {
         let before = points.clone();
@@ -49,38 +45,33 @@ pub fn part2(lines: &[String]) -> String {
         }
         if changes.len() == 12 {
             println!("last gen, adding more frames");
-            let change = changes.last().unwrap();
-            for _ in 0..30 {
-                frames.push(paint(
-                    global_bounds,
-                    (width, height),
-                    &before,
-                    &change,
-                    Some(*f),
-                ));
+            let frame = frames.last().unwrap().clone();
+            for _ in 0..20 {
+                frames.push(frame.clone());
             }
         }
         match f {
-            Fold::X(x) => width = *x as u32 + 1,
-            Fold::Y(y) => height = *y as u32 + 1,
+            Fold::X(x) => width = *x + 1,
+            Fold::Y(y) => height = *y + 1,
         }
         changes.last().unwrap().iter().unique().copied().collect()
     });
-    let final_width = (points.iter().map(|point| point.x).max().unwrap_or(0) + 1) as u32;
-    let final_height = (points.iter().map(|point| point.y).max().unwrap_or(0) + 1) as u32;
-    for _ in 0..30 {
-        frames.push(paint(
-            global_bounds,
-            (final_width, final_height),
-            &points,
-            &points,
-            None,
-        ));
+
+    let final_width = points.iter().map(|point| point.x).max().unwrap_or(0) + 1;
+    let final_height = points.iter().map(|point| point.y).max().unwrap_or(0) + 1;
+    let frame = paint(
+        global_bounds,
+        (final_width, final_height),
+        &points,
+        &points,
+        None,
+    );
+    for _ in 0..20 {
+        frames.push(frame.clone())
     }
+
     println!("{} {} x {} frames", frames.len(), width, height);
-    let gif = File::create("day13.gif").unwrap();
-    let mut encoder = GifEncoder::new(gif);
-    encoder.encode_frames(frames).unwrap();
+    gif::write("day13.gif", frames);
     render(points)
 }
 
@@ -115,14 +106,14 @@ fn fold(mut points: Vec<Point>, fold: &Fold) -> Vec<Vec<Point>> {
 }
 
 fn paint(
-    global_bounds: (u32, u32),
-    current_bounds: (u32, u32),
+    global_bounds: (usize, usize),
+    current_bounds: (usize, usize),
     points: &Vec<Point>,
     changes: &Vec<Point>,
     fold: Option<Fold>,
 ) -> Frame {
     let (width, height) = current_bounds;
-    let mut buffer = RgbaImage::new(width, height);
+    let mut image = Image::new(width, height);
     let axis: HashSet<Point> = match fold {
         Some(Fold::X(x)) => (0..height).map(|y| Point::new(x, y as usize)).collect(),
         Some(Fold::Y(y)) => (0..width).map(|x| Point::new(x as usize, y)).collect(),
@@ -133,32 +124,22 @@ fn paint(
             let point = Point::new(x as usize, y as usize);
             if let Some(i) = changes.iter().position(|&x| x == point) {
                 if points[i] != point {
-                    buffer.put_pixel(x, y, Rgba([255, 255, 0, 1]));
+                    image.set(x, y, [255, 255, 0]);
                 } else {
-                    buffer.put_pixel(x, y, Rgba([0, 255, 255, 1]));
+                    image.set(x, y, [0, 255, 255]);
                 }
             } else if axis.contains(&point) {
-                buffer.put_pixel(x, y, Rgba([255, 0, 255, 1]));
+                image.set(x, y, [255, 0, 255]);
             } else {
-                buffer.put_pixel(x, y, Rgba([0, 0, 0, 1]));
+                image.black(x, y);
             }
         }
     }
     if global_bounds.0 != width || global_bounds.1 != height {
-        buffer = resize(
-            &buffer,
-            global_bounds.0,
-            global_bounds.1,
-            FilterType::Nearest,
-        );
+        image = image.resize(global_bounds.0, global_bounds.1);
     }
 
-    Frame::from_parts(
-        buffer,
-        0,
-        0,
-        Delay::from_saturating_duration(Duration::from_millis(100)),
-    )
+    image.frame(100)
 }
 
 fn render(points: Vec<Point>) -> String {

@@ -1,11 +1,7 @@
+use crate::gif::{self, Frame, Image};
 use itertools::Itertools;
 use std::cmp::Reverse;
 use std::collections::{BinaryHeap, HashMap, HashSet};
-
-use image::codecs::gif::GifEncoder;
-use image::{Delay, Frame, Rgba, RgbaImage};
-use std::fs::File;
-use std::time::Duration;
 
 /// Find the cost of the optimal path from starting point to the bottom-right point.
 pub fn part1(lines: &[String]) -> usize {
@@ -98,15 +94,16 @@ impl Graph {
         let mut steps = 0;
         while let Some((Reverse(cost), node @ (row, col))) = queue.pop() {
             if node == target {
-                frames.push(self.to_frame(
+                let frame = self.to_frame(
                     &costs,
                     queue.iter().map(|(_, p)| p).copied().collect(),
                     node,
                     &parents,
-                ));
-                let gif = File::create("day15.gif").unwrap();
-                let mut encoder = GifEncoder::new(gif);
-                encoder.encode_frames(frames).unwrap();
+                );
+                for _ in 0..20 {
+                    frames.push(frame.clone());
+                }
+                gif::write("day15.gif", frames);
                 return cost;
             }
 
@@ -147,9 +144,9 @@ impl Graph {
         parents: &HashMap<Point, Point>,
     ) -> Frame {
         let (height, width) = self.dimensions();
-        let height = height as u32;
-        let width = width as u32;
-        let mut buffer = RgbaImage::new(width, height);
+        let height = height as usize;
+        let width = width as usize;
+        let mut image = Image::new(width, height);
 
         let mut path = HashSet::from([node]);
         while let Some(&parent) = parents.get(&node) {
@@ -163,24 +160,19 @@ impl Graph {
                 let j = x as i64;
                 let point = (i, j);
                 if path.contains(&point) {
-                    buffer.put_pixel(x, y, Rgba([255, 255, 255, 1]));
+                    image.set(x, y, [255, 255, 255]);
                 } else if fringe.contains(&point) {
-                    buffer.put_pixel(x, y, Rgba([0, 255, 255, 1]));
+                    image.set(x, y, [0, 255, 255]);
                 } else if costs.get(&point) == Some(&usize::MAX) {
-                    buffer.put_pixel(x, y, Rgba([0, 0, 0, 1]));
+                    image.black(x, y);
                 } else {
                     let cost = *self.graph.get(&point).unwrap();
                     let b = ((cost as f64 / 9.0) * 255.0).floor() as u8;
-                    buffer.put_pixel(x, y, Rgba([0, 0, b, 1]));
+                    image.set(x, y, [0, 0, b]);
                 }
             }
         }
-        Frame::from_parts(
-            buffer,
-            0,
-            0,
-            Delay::from_saturating_duration(Duration::from_millis(1)),
-        )
+        image.frame(1)
     }
 }
 
